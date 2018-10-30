@@ -45,6 +45,8 @@ class Dealer(object):
         self.__handling_cards = self.__all_cards
         self.first_handout_cards()
         self.__field_cards = []
+        self.__callcheck = False
+        self.__after_call_flag = 0
 
     def deack_reset(self):
         print(len(self.__handling_cards))
@@ -71,7 +73,7 @@ class Dealer(object):
         car = []
         able_num = len(self.__handling_cards)
         car.append([self.__handling_cards.pop(able_num-1-i) for i in range(num)])
-        print([card.card for card in car[-1]])
+        # print([card.card for card in car[-1]])
         player.get_hand(car[-1])
 
     def get_resp(self):
@@ -79,14 +81,12 @@ class Dealer(object):
             resp = player.restore_cards()
             self.__field_cards = self.__field_cards + resp[1]
             self.handout_cards(player, resp[0])
-            player.respond()
+            if self.__callcheck is False:
+                if player.respond() == 'call':
+                    self.__callcheck = True
+            else:
+                self.__after_call_flag = self.__after_call_flag + 1
+                if self.__after_call_flag == len(self.__players) - 1:
+                    return 'end'
             self.deack_reset()
-
-
-    def restore(self):
-        for player in self.__players:
-            player.restore_cards()
-
-    def get_respond(self):
-        for player in self.__players:
-            player.respond()
+        return 'continue'

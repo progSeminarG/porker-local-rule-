@@ -11,7 +11,6 @@ class Player(object):
     def restore_cards(self):
         ls = [0, 1, 2, 3, 4]
         num = random.randint(1,5)
-        num = 5
         ret = sorted(random.sample(ls, num))
         restore = []
         [restore.append(self.my_cards.pop(num-1-i)) for i in range(0,num)]
@@ -19,7 +18,7 @@ class Player(object):
         return [num, restore]
 
     def respond(self):
-        ret = ['call', 'stay']
-        ret = random.sample(ret, 1)
+        ret = ['call']+['stay']*10
+        ret = ret[random.randint(0,len(ret)-1)]
         print(ret)
         return ret

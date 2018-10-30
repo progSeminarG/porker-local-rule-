@@ -7,9 +7,9 @@ class Game(object):
         self.dealer = Dealer(self, players_list)
 
     def play(self):
-        #self.dealer.restore()
-        #self.dealer.get_respond()
-        self.dealer.get_resp()
+        gamecont = 'continue'
+        while gamecont == 'continue':
+            gamecont = self.dealer.get_resp()
 
 
 player1 = Player()
