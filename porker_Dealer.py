@@ -40,10 +40,17 @@ class Dealer(object):
         self.__NUM_HAND = 5
         self.__game_inst = game_inst
         self.__players = deepcopy(players_input)  # instance of players
-        self.__num_players = len(self.__players)  # number of players
+        self.__num_players = len(self.__players)  # number of players ~8
         self.__create_all_cards_stack()
-        self.handout_cards()
         self.__handling_cards = self.__all_cards
+        self.first_handout_cards()
+        self.__field_cards = []
+
+    def deack_reset(self):
+        print(len(self.__handling_cards))
+        if len(self.__handling_cards) < 5:
+            self.__handling_cards = self.__handling_cards + self.__field_cards
+            self.__field_cards = []
 
     def __create_all_cards_stack(self):
         self.__all_cards = []
@@ -52,12 +59,29 @@ class Dealer(object):
             for suit in self.__SUITE:
                 self.__all_cards.append(Card(suit, inumber))
 
-    def handout_cards(self):
-        self.__players_cards = []  # each player's hand
+    def first_handout_cards(self):
+        self.__players_cards = []
         for player in self.__players:
-            self.__players_cards.append([self.__handling_cards.pop(i) for i in
+            able_num =len(self.__handling_cards)
+            self.__players_cards.append([self.__handling_cards.pop(able_num-1-i) for i in
                                          range(self.__NUM_HAND)])
             player.get_hand(self.__players_cards[-1])
+
+    def handout_cards(self, player, num):
+        car = []
+        able_num = len(self.__handling_cards)
+        car.append([self.__handling_cards.pop(able_num-1-i) for i in range(num)])
+        print([card.card for card in car[-1]])
+        player.get_hand(car[-1])
+
+    def get_resp(self):
+        for player in self.__players:
+            resp = player.restore_cards()
+            self.__field_cards = self.__field_cards + resp[1]
+            self.handout_cards(player, resp[0])
+            player.respond()
+            self.deack_reset()
+
 
     def restore(self):
         for player in self.__players:
