@@ -6,7 +6,7 @@ class Player(object):
 
     def get_hand(self, dealer_input):
         self.my_cards = self.my_cards + dealer_input
-        print([card.card for card in self.my_cards])
+        # print([card.card for card in self.my_cards])
 
     def restore_cards(self):
         ls = [0, 1, 2, 3, 4]
@@ -18,7 +18,7 @@ class Player(object):
         return [num, restore]
 
     def respond(self):
-        ret = ['call']+['stay']*10
+        ret = ['call']+['stay']*99
         ret = ret[random.randint(0,len(ret)-1)]
         print(ret)
         return ret

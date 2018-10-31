@@ -10,6 +10,9 @@ class Game(object):
         gamecont = 'continue'
         while gamecont == 'continue':
             gamecont = self.dealer.get_resp()
+        print()
+        print("open hands")
+        self.dealer.printhands()
 
 
 player1 = Player()
