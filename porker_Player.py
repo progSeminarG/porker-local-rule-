@@ -18,7 +18,7 @@ class Player(object):
         return [num, restore]
 
     def respond(self):
-        ret = ['call']+['stay']*99
+        ret = ['call']*0+['stay']*99
         ret = ret[random.randint(0,len(ret)-1)]
         print(ret)
         return ret

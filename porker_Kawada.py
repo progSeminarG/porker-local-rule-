@@ -1,125 +1,49 @@
-# ! /usr/bin/env python3
-
 import random
-import sys
-from copy import deepcopy
-import collections
+from porker_Dealer import Dealer
+
+class Player(object):
+    def __init__(self):
+        self.my_cards = []
+
+    def get_hand(self, dealer_input):
+        self.my_cards = self.my_cards + dealer_input
+        # print([card.card for card in self.my_cards])
+
+    def restore_cards(self):
+        ls = [0, 1, 2, 3, 4]
+        num = random.randint(1,5)
+        ret = sorted(random.sample(ls, num))
+        restore = []
+        [restore.append(self.my_cards.pop(num-1-i)) for i in range(0,num)]
+        print([num,[card.card for card in restore]])
+        return [num, restore]
+
+    def respond(self):
+        ret = ['call']+['stay']*99
+        ret = ret[random.randint(0,len(ret)-1)]
+        print(ret)
+        return ret
 
 
-class Card(object):
-    def __init__(self, suit, number):
-        if suit not in ("S", "C", "H", "D"):
-            # S: spade, C: club, H: heart, D: Diamond
-            raise ValueError("ERROR: suit of card is not correct: "
-                             + str(suit))
-        self.__suit = suit
-        if number not in range(1, 14):
-            raise ValueError("ERROR: number of card is not correct: "
-                             + str(number))
-        self.__number = number
+class KawadaAI(Player):
+    def restore_cards(self):
+        ls = [0, 1, 2, 3, 4]
+        num = random.randint(1,5)
+        ret = sorted(random.sample(ls, num))
+        restore = []
+        [restore.append(self.my_cards.pop(num-1-i)) for i in range(0,num)]
+        print([num,[card.card for card in restore]])
+        return [num, restore]
 
-    @property
-    def card(self):
-        return (self.__suit, self.__number)
-
-    @property
-    def suit(self):
-        return self.__suit
-
-    @property
-    def number(self):
-        return self.__number
+    def respond(self):
+        ret = ['call']*0+['stay']*99
+        ret = ret[random.randint(0,len(ret)-1)]
+        if self.calc_hand_score(self.my_cards) >= 3:
+            ret = 'call'
+        print(ret)
+        return ret
 
 
-class Dealer(object):
-    def __init__(self, game_inst, players_input):
-        # FIXED PARAMETERS
-        self.__MIN_NUMBER_CARDS = 1  # smallest number of playing cards
-        self.__MAX_NUMBER_CARDS = 13  # largest number of playing cards
-        self.__SUITE = ['S', 'C', 'H', 'D']  # suit of playing cards
-        self.__NUM_HAND = 5
-        self.__game_inst = game_inst
-        self.__players = deepcopy(players_input)  # instance of players
-        self.__num_players = len(self.__players)  # number of players ~8
-        self.__create_all_cards_stack()
-        self.__handling_cards = self.__all_cards
-        self.__playershands = [None]*len(self.__players)
-        random.shuffle(self.__handling_cards)
-        self.first_handout_cards()
-        self.__field_cards = []
-        self.__callcheck = False
-        self.__after_call_flag = 0
-
-    def deack_reset(self):
-        if len(self.__handling_cards) < 5:
-            self.__handling_cards = self.__handling_cards + self.__field_cards
-            random.shuffle(self.__handling_cards)
-            self.__field_cards = []
-            print("deack_reset")
-
-    def __create_all_cards_stack(self):
-        self.__all_cards = []
-        for inumber in range(self.__MIN_NUMBER_CARDS,
-                             self.__MAX_NUMBER_CARDS+1):
-            for suit in self.__SUITE:
-                self.__all_cards.append(Card(suit, inumber))
-
-    def first_handout_cards(self):
-        i = 0
-        self.__players_cards = []
-        for player in self.__players:
-            able_num =len(self.__handling_cards)
-            self.__players_cards.append([self.__handling_cards.pop(able_num-1-i) for i in
-                                         range(self.__NUM_HAND)])
-            self.__playershands[i] = self.__players_cards[-1]
-            player.get_hand(self.__players_cards[-1])
-
-    def printhands(self):
-        for i in range(len(self.__players)):
-            print([card.card for card in self.__players_cards[i]])
-            print(self.calc_hand_score(self.__players_cards[i]))
-
-    def handout_cards(self, player, playernum, num):
-        car = []
-        able_num = len(self.__handling_cards)
-        car.append([self.__handling_cards.pop(able_num-1-i) for i in range(num)])
-        # print([card.card for card in car[-1]])
-        self.__players_cards[playernum] = self.__players_cards[playernum]+car[-1]
-        player.get_hand(car[-1])
-
-    def get_resp(self):
-        i = 0
-        for player in self.__players:
-            print("player", i+1)
-            resp = player.restore_cards()
-            self.restore(i, resp)
-            self.__field_cards = self.__field_cards + resp[1]
-            self.handout_cards(player, i, resp[0])
-            if self.__callcheck is False:
-                if player.respond() == 'call':
-                    self.__callcheck = True
-            else:
-                self.__after_call_flag = self.__after_call_flag + 1
-                if self.__after_call_flag == len(self.__players) - 1:
-                    return 'end'
-            print()
-            self.deack_reset()
-            i = i+1
-        return 'continue'
-
-    def restore(self, playernum, resp):
-        for i in range(resp[0]):
-            for j in range(len(self.__players_cards[playernum])):
-                if resp[1][i] == self.__players_cards[playernum][j]:
-                    rest = j
-            self.__players_cards[playernum].pop(rest)
-
-
-
-
-
-    # calculate best score from given set of cards
-    # 担当：白井．7枚のカードリストを受け取り，役とベストカードを返します．
     def calc_hand_score(self, cards):  # 7カードリストクラスをもらう
         SS = ['S', 'C', 'H', 'D']
         suit_list = [0, 0, 0, 0]
@@ -157,7 +81,7 @@ class Dealer(object):
         elif pp[1] == 2:  # 3c *2
             score = 6
             c = 0
-            for i in range(self.__MAX_NUMBER_CARDS):
+            for i in range(13):
                 if num.count(14-i) == 3:
                     for n in range(len(card_list)):
                         if card_list[n][1] == (14-i):
@@ -179,7 +103,7 @@ class Dealer(object):
         elif pp[2] >= 2:
             score = 2
             c = 0
-            for i in range(self.__MAX_NUMBER_CARDS):
+            for i in range(13):
                 if num.count(14-i) == 2 and c != 2:
                     c += 1
         # 1pair
@@ -229,7 +153,7 @@ class Dealer(object):
                 pair[any_cards[i].number-1]+1
                 # カードのnumber要素を参照し先ほどのリストpairの対応要素のカウントを1つ増やす
         pairs = [0, 0, 0]  # pairsは[4カード有無, 3カードの有無, ペアの数]のリスト
-        for i in range(0, self.__MAX_NUMBER_CARDS):  # pairの要素A~13すべて順に参照
+        for i in range(0, 13):  # pairの要素A~13すべて順に参照
             if pair[i] == 4:  # lその要素が４枚あるときpairs[0]のカウントを増やす
                 pairs[0] = pairs[0]+1
             elif pair[i] == 3:  # 同様に3枚

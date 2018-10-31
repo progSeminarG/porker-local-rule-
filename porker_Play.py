@@ -1,4 +1,5 @@
 from porker_Player import Player
+from porker_Kawada import KawadaAI
 from porker_Dealer import Card, Dealer
 
 class Game(object):
@@ -15,7 +16,7 @@ class Game(object):
         self.dealer.printhands()
 
 
-player1 = Player()
+player1 = KawadaAI()
 player2 = Player()
 player3 = Player()
 player4 = Player()
