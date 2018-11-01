@@ -37,7 +37,7 @@ class KawadaAI(Player):
     def respond(self):
         ret = ['call']*0+['stay']*99
         ret = ret[random.randint(0,len(ret)-1)]
-        if self.calc_hand_score(self.my_cards) >= 3:
+        if self.calc_hand_score(self.my_cards) >= 8:
             ret = 'call'
         print(ret)
         return ret
@@ -66,10 +66,8 @@ class KawadaAI(Player):
                 flash_list = []
         straight = self.stlist(card_list)
         if straight == 1 and flash == 1:
-            (st, st_list) = self.stlist(flash_list)
-            if st == 1:
-                score = 8
-                straight_flash = 1
+            score = 8
+            straight_flash = 1
 
         # == JUDGE BELOW ==
         # Straight-Flash

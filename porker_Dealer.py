@@ -150,10 +150,8 @@ class Dealer(object):
                 flash_list = []
         straight = self.stlist(card_list)
         if straight == 1 and flash == 1:
-            (st, st_list) = self.stlist(flash_list)
-            if st == 1:
-                score = 8
-                straight_flash = 1
+            score = 8
+            straight_flash = 1
 
         # == JUDGE BELOW ==
         # Straight-Flash
