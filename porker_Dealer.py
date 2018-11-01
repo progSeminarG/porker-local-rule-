@@ -50,7 +50,11 @@ class Dealer(object):
         self.__callcheck = False
         self.__after_call_flag = 0
 
-    def deack_reset(self):
+    @property
+    def names_of_players(self):
+        return [i.__class__.__name__ for i in self.__players]
+
+    def deack_reset(self):  # dealerのカードが減ったら場のカードを回収して補充する
         if len(self.__handling_cards) < 5:
             self.__handling_cards = self.__handling_cards + self.__field_cards
             random.shuffle(self.__handling_cards)
@@ -76,8 +80,10 @@ class Dealer(object):
 
     def printhands(self):
         for i in range(len(self.__players)):
+            print(self.names_of_players[i])
             print([card.card for card in self.__players_cards[i]])
             print(self.calc_hand_score(self.__players_cards[i]))
+            print()
 
     def handout_cards(self, player, playernum, num):
         car = []
@@ -90,11 +96,11 @@ class Dealer(object):
     def get_resp(self):
         i = 0
         for player in self.__players:
-            print("player", i+1)
+            print(self.names_of_players[i])
             resp = player.restore_cards()
             self.restore(i, resp)
-            self.__field_cards = self.__field_cards + resp[1]
-            self.handout_cards(player, i, resp[0])
+            self.__field_cards = self.__field_cards + resp
+            self.handout_cards(player, i, len(resp))
             if self.__callcheck is False:
                 if player.respond() == 'call':
                     self.__callcheck = True
@@ -108,9 +114,10 @@ class Dealer(object):
         return 'continue'
 
     def restore(self, playernum, resp):
-        for i in range(resp[0]):
+        print([card.card for card in resp])
+        for i in range(len(resp)):
             for j in range(len(self.__players_cards[playernum])):
-                if resp[1][i] == self.__players_cards[playernum][j]:
+                if resp[i] == self.__players_cards[playernum][j]:
                     rest = j
             self.__players_cards[playernum].pop(rest)
 

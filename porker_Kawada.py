@@ -32,8 +32,7 @@ class KawadaAI(Player):
         ret = sorted(random.sample(ls, num))
         restore = []
         [restore.append(self.my_cards.pop(num-1-i)) for i in range(0,num)]
-        print([num,[card.card for card in restore]])
-        return [num, restore]
+        return restore
 
     def respond(self):
         ret = ['call']*0+['stay']*99
