@@ -42,17 +42,30 @@ class Dealer(object):
         self.__players = deepcopy(players_input)  # instance of players
         self.__num_players = len(self.__players)  # number of players ~8
         self.__create_all_cards_stack()
+        # get players know dealer's instance
+        for player in self.__players:
+            player.get_know_dealer(self)
         self.__handling_cards = self.__all_cards
+        self.__create_all_cards_stack()
         self.__playershands = [None]*len(self.__players)
         random.shuffle(self.__handling_cards)
-        self.first_handout_cards()
         self.__field_cards = []
         self.__callcheck = False
         self.__after_call_flag = 0
+        self.first_handout_cards()
+
+
 
     @property
     def names_of_players(self):
         return [i.__class__.__name__ for i in self.__players]
+
+    @property
+    def all_cards(self):
+        return self.__all_cards
+
+    def field_cards(self):
+        return self.__field_cards
 
     def deack_reset(self):  # dealerのカードが減ったら場のカードを回収して補充する
         if len(self.__handling_cards) < 5:
@@ -103,7 +116,10 @@ class Dealer(object):
             self.handout_cards(player, i, len(resp))
             if self.__callcheck is False:
                 if player.respond() == 'call':
+                    print('call')
                     self.__callcheck = True
+                else:
+                    print('stay')
             else:
                 self.__after_call_flag = self.__after_call_flag + 1
                 if self.__after_call_flag == len(self.__players) - 1:

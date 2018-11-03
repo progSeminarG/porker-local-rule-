@@ -1,5 +1,7 @@
 import random
-from porker_Dealer import Dealer
+import itertools
+from porker_Dealer import Card
+from operator import itemgetter
 
 class Player(object):
     def __init__(self):
@@ -7,26 +9,10 @@ class Player(object):
 
     def get_hand(self, dealer_input):
         self.my_cards = self.my_cards + dealer_input
-        # print([card.card for card in self.my_cards])
+        print([card.card for card in self.my_cards])
 
     def restore_cards(self):
-        ls = [0, 1, 2, 3, 4]
-        num = random.randint(1,5)
-        ret = sorted(random.sample(ls, num))
-        restore = []
-        [restore.append(self.my_cards.pop(num-1-i)) for i in range(0,num)]
-        print([num,[card.card for card in restore]])
-        return [num, restore]
-
-    def respond(self):
-        ret = ['call']+['stay']*99
-        ret = ret[random.randint(0,len(ret)-1)]
-        print(ret)
-        return ret
-
-
-class KawadaAI(Player):
-    def restore_cards(self):
+        print([card.card for card in self.my_cards])
         ls = [0, 1, 2, 3, 4]
         num = random.randint(1,5)
         ret = sorted(random.sample(ls, num))
@@ -35,14 +21,82 @@ class KawadaAI(Player):
         return restore
 
     def respond(self):
-        ret = ['call']*0+['stay']*99
+        ret = ['call']+['stay']*99
         ret = ret[random.randint(0,len(ret)-1)]
-        if self.calc_hand_score(self.my_cards) >= 8:
-            ret = 'call'
-        print(ret)
         return ret
 
 
+class KawadaAI(Player):
+    def get_hand(self, dealer_input):
+        self.my_cards = self.my_cards + dealer_input
+        print([card.card for card in self.my_cards])
+
+    def know_not_open_card(self):
+        self.field = self.dealer.field_cards()
+        self.not_open = self.subtract_list(self.dealer.all_cards, self.field)
+        self.not_open = self.subtract_list(self.not_open, self.my_cards)
+
+    def get_know_dealer(self, dealer_input):
+        self.dealer = dealer_input
+
+    def restore_cards(self):
+        new_my_cards = self.think_percentage()
+        restore = self.subtract_list(self.my_cards, new_my_cards)
+        self.my_cards = new_my_cards
+        return restore
+
+    def respond(self):
+        ret = ['call']*0+['stay']*99
+        ret = ret[random.randint(0,len(ret)-1)]
+        if self.calc_hand_score(self.my_cards) >= 3:
+            ret = 'call'
+        return ret
+
+    def think_percentage(self):
+        basescore = self.calc_hand_score(self.my_cards)
+        self.know_not_open_card()
+        ok_list = []
+        for i in range (0, 5):
+            possible_list = list(itertools.combinations(self.my_cards, i))
+            possible_dlaw = list(itertools.combinations(self.not_open, 5-i))
+            for j in range(len(possible_list)):
+                scores = []
+                for k in range(len(possible_dlaw)):
+                    score  = self.calc_hand_score(possible_list[j]+possible_dlaw[k])
+                    scores.append(score)
+                    '''if score < basescore:
+                        break'''
+                    if k == len(possible_dlaw)-1:
+                        ok_list.append([possible_list[j], sum(scores)*100/k])
+        if len(ok_list)==0:
+            return [self.my_cards[0]]
+        return list(sorted(ok_list, key=itemgetter(1))[-1][0])
+
+    def tuple_to_list(self, tuple):
+        makelist = []
+        for i in range(len(tuple)):
+            makelist.append(tuple[i])
+        return makelist
+
+    def subtract_list(self, list1, list2):  # list1からlist2の要素を削除したリストを作成
+        retlist = []
+        poplist = []
+        for i in range(len(list2)):
+            for j in range(len(list1)):
+                if list2[i].card == list1[j].card:
+                    poplist.append(j)
+                    break
+        poplist.sort()
+        poplist.append(100)
+        j=0
+        for i in range(len(list1)):
+            if i != poplist[j]:
+                retlist.append(list1[i])
+            else:
+                j = j+1
+        return retlist
+
+    # 以下callの目安、手持ちのスコアを計算する
     def calc_hand_score(self, cards):  # 7カードリストクラスをもらう
         SS = ['S', 'C', 'H', 'D']
         suit_list = [0, 0, 0, 0]
